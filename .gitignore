@@ -1,0 +1,5 @@
+env
+__pycache__
+frontend/.next
+frontend/dist
+frontend/node_modules

@@ -20,3 +20,4 @@ export default function DataTable({ columns, data }: any) {
     </table>
   );
 }
+

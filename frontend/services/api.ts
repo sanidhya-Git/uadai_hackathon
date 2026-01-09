@@ -15,3 +15,7 @@ export const fetchAnomalies = () =>
 
 export const fetchForecast = () =>
   api.get("?path=forecast/next-cycle");
+export const fetchDistrictInsights = (state: string) =>
+  api.get(`?path=district/${state}`);
+
+

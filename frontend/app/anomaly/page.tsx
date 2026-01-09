@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { fetchAnomalies } from "../../services/api";
 import Navbar from "../../components/Navbar";
+import Heatmap from "../../components/Heatmap";
 
 export default function AnomalyPage() {
   const [alerts, setAlerts] = useState<any[]>([]);
@@ -15,7 +16,10 @@ export default function AnomalyPage() {
       <Navbar />
       <div style={{ padding: 20 }}>
         <h2>Anomalous Enrolment Patterns</h2>
-        <table>
+
+        <Heatmap data={alerts} />
+
+        <table style={{ marginTop: 20 }}>
           <thead>
             <tr>
               <th>State</th>
