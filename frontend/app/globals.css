@@ -1,21 +1,103 @@
- body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #f5f6fa;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================== CSS VARIABLES ==================== */
+:root {
+  --background: #f9fafb;
+  --foreground: #111827;
+
+  --card: #ffffff;
+  --card-foreground: #111827;
+
+  --primary: #2563eb;
+  --secondary: #6366f1;
+  --accent: #f59e0b;
+  --danger: #ef4444;
+
+  --border: #e5e7eb;
+  --ring: #3b82f6;
+
+  --radius: 1rem;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
+/* ==================== DARK MODE ==================== */
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+
+  --card: #020617;
+  --card-foreground: #f8fafc;
+
+  --border: #1e293b;
 }
 
-th, td {
-  padding: 10px;
-  border: 1px solid #ddd;
+/* ==================== BASE STYLES ==================== */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  }
 }
 
-th {
-  background-color: #f0f0f0;
+/* ==================== GLASSMORPHISM ==================== */
+@layer components {
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg rounded-2xl;
+  }
+
+  .glass-nav {
+    @apply bg-white/70 backdrop-blur-2xl border-b border-white/20 shadow-md;
+  }
 }
 
+/* ==================== ANIMATIONS ==================== */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(20px, -20px) scale(1.05);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+  75% {
+    transform: translate(20px, 20px) scale(1.02);
+  }
+}
 
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #2563eb, #6366f1);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
