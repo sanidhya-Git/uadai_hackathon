@@ -1,13 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "../components/navbar"
+import { Navbar } from "../components/Navbar"
 import { KPICard } from "../components/kpi-card"
 import { ChartArea } from "../components/chart-area"
 import { ChartPie } from "../components/chart-pie"
 import { ChartRadar } from "../components/chart-radar"
 import { HeatmapIndia } from "../components/heatmap-india"
 import { getOverviewMetrics, getStateInsights } from "../lib/api-client"
+import { UploadDataset } from "../components/upload-panel"
+
 
 interface EnrolmentTrendData {
   name: string
@@ -89,6 +91,7 @@ export default function Home() {
   return (
     <main>
       <Navbar />
+  
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Hero Section */}
@@ -150,6 +153,9 @@ export default function Home() {
         {/* Heatmap */}
         <div className="mb-8">
           <HeatmapIndia />
+        </div>
+                <div className="mb-8">
+            <UploadDataset />
         </div>
       </div>
     </main>

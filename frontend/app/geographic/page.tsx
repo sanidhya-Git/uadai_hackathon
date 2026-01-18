@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "../../components/navbar"
+import { Navbar } from "../../components/Navbar"
 import { InteractiveHeatmap } from "../../components/interactive-heatmap"
 import { ChartBar } from "../../components/chart-bar"
 import { SearchFilter } from "../../components/search-filter"
 import { getStateInsights, getDistrictInsights } from "../../lib/api-client"
+import { UploadDataset } from "../../components/upload-panel"
 
 interface StateData {
   name: string
@@ -14,60 +15,45 @@ interface StateData {
 
 export default function GeographicPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [topStatesData, setTopStatesData] = useState<StateData[]>([])
-  const [topDistrictsData, setTopDistrictsData] = useState<StateData[]>([])
+  const [topStates, setTopStates] = useState<StateData[]>([])
+  const [topDistricts, setTopDistricts] = useState<StateData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const statesData = await getStateInsights()
-
-        // Get top 5 states
-        const sortedStates = statesData.sort((a, b) => b.total_enrolments - a.total_enrolments).slice(0, 5)
-
-        const topStates: StateData[] = sortedStates.map((state) => ({
-          name: state.state,
-          value: Math.round(state.total_enrolments / 1000000),
-        }))
-
-        setTopStatesData(topStates)
-
-        // Get districts for first top state
-        if (sortedStates.length > 0) {
-          const districtsData = await getDistrictInsights(sortedStates[0].state)
-          const topDistricts: StateData[] = districtsData
-            .sort((a, b) => b.total_enrolments - a.total_enrolments)
-            .slice(0, 5)
-            .map((district) => ({
-              name: district.district,
-              value: Math.round(district.total_enrolments / 1000000),
-            }))
-
-          setTopDistrictsData(topDistricts)
-        }
-      } catch (err) {
-        console.error("[v0] Error fetching geographic data:", err)
-        setError(err instanceof Error ? err.message : "Failed to fetch data")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
+    loadTopStats()
   }, [])
+
+  const loadTopStats = async () => {
+    try {
+      setLoading(true)
+      const states = await getStateInsights("all")
+
+      const sorted = states.sort((a,b)=>b.total_enrolments-a.total_enrolments)
+      setTopStates(sorted.slice(0,5).map(s=>({
+        name:s.state,
+        value:Math.round(s.total_enrolments/1e6)
+      })))
+
+      if(sorted.length){
+        const d = await getDistrictInsights(sorted[0].state,"all")
+        setTopDistricts(d.slice(0,5).map(x=>({
+          name:x.district,
+          value:Math.round(x.total_enrolments/1e6)
+        })))
+      }
+    } catch(e:any){
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (error) {
     return (
       <main>
         <Navbar />
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="glass-card rounded-2xl p-8 border-red-200/50 bg-red-500/10">
-            <p className="text-red-600">Error: {error}</p>
-          </div>
-        </div>
+        <div className="p-10 text-red-600">Error: {error}</div>
       </main>
     )
   }
@@ -75,66 +61,25 @@ export default function GeographicPage() {
   return (
     <main>
       <Navbar />
+      <UploadDataset />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Page Header */}
-        <div className="glass-card rounded-2xl p-8 mb-8 bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-purple-600/10 border-purple-200/50">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Geographic & District Analysis</h1>
-          <p className="text-lg text-muted-foreground">
-            Explore enrolment density, regional trends, and district-level insights
-          </p>
-        </div>
+        <SearchFilter onSearch={setSearchQuery} />
 
-        {/* Search Filter */}
-        <div className="mb-8">
-          <SearchFilter onSearch={setSearchQuery} />
-        </div>
+        <InteractiveHeatmap />
 
-        {/* Interactive Heatmap */}
-        <div className="mb-8">
-          <InteractiveHeatmap />
-        </div>
-
-        {/* Top States and Districts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           {loading ? (
             <>
-              <div className="glass-card rounded-xl p-6 h-96 bg-white/30 animate-pulse" />
-              <div className="glass-card rounded-xl p-6 h-96 bg-white/30 animate-pulse" />
+              <div className="glass-card h-96 animate-pulse" />
+              <div className="glass-card h-96 animate-pulse" />
             </>
           ) : (
             <>
-              <ChartBar data={topStatesData} title="Top States by Enrolment Volume" color="#3b82f6" />
-              <ChartBar data={topDistrictsData} title="Top Districts by Activity" color="#6366f1" />
+              <ChartBar data={topStates} title="Top States by Enrolment" />
+              <ChartBar data={topDistricts} title="Top Districts by Enrolment" />
             </>
           )}
-        </div>
-
-        {/* Regional Statistics */}
-        <div className="glass-card rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Regional Statistics</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white/40 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-1">Northern Region</p>
-              <p className="text-2xl font-bold text-foreground">324M</p>
-              <p className="text-xs text-muted-foreground mt-1">enrolments</p>
-            </div>
-            <div className="bg-white/40 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-1">Southern Region</p>
-              <p className="text-2xl font-bold text-foreground">289M</p>
-              <p className="text-xs text-muted-foreground mt-1">enrolments</p>
-            </div>
-            <div className="bg-white/40 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-1">Eastern Region</p>
-              <p className="text-2xl font-bold text-foreground">256M</p>
-              <p className="text-xs text-muted-foreground mt-1">enrolments</p>
-            </div>
-            <div className="bg-white/40 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-1">Western Region</p>
-              <p className="text-2xl font-bold text-foreground">412M</p>
-              <p className="text-xs text-muted-foreground mt-1">enrolments</p>
-            </div>
-          </div>
         </div>
       </div>
     </main>

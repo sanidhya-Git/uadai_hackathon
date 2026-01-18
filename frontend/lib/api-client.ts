@@ -1,4 +1,3 @@
-// API client for communicating with FastAPI backend
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 export interface OverviewMetrics {
@@ -32,52 +31,45 @@ export interface ForecastComparison {
   prophet_prediction: number | null
 }
 
-// Overview endpoints
+// ================= OVERVIEW =================
+
 export async function getOverviewMetrics(): Promise<OverviewMetrics> {
-  const response = await fetch(`${API_BASE_URL}/overview/`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-  if (!response.ok) throw new Error("Failed to fetch overview metrics")
-  return response.json()
+  const res = await fetch(`${API_BASE_URL}/overview/`)
+  if (!res.ok) throw new Error("Failed to fetch overview metrics")
+  return res.json()
 }
 
-// State endpoints
-export async function getStateInsights(): Promise<StateInsight[]> {
-  const response = await fetch(`${API_BASE_URL}/state/insights`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-  if (!response.ok) throw new Error("Failed to fetch state insights")
-  return response.json()
+// ================= STATE (AGE FILTER ENABLED) =================
+
+export async function getStateInsights(age: "all" | "0-5" | "5-17" | "18+" = "all"): Promise<StateInsight[]> {
+  const res = await fetch(`${API_BASE_URL}/state/insights?age=${age}`)
+  if (!res.ok) throw new Error("Failed to fetch state insights")
+  return res.json()
 }
 
-// District endpoints
-export async function getDistrictInsights(stateName: string): Promise<DistrictInsight[]> {
-  const response = await fetch(`${API_BASE_URL}/district/${encodeURIComponent(stateName)}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-  if (!response.ok) throw new Error(`Failed to fetch district insights for ${stateName}`)
-  return response.json()
+// ================= DISTRICT (AGE FILTER ENABLED) =================
+
+export async function getDistrictInsights(
+  stateName: string,
+  age: "all" | "0-5" | "5-17" | "18+" = "all"
+): Promise<DistrictInsight[]> {
+  const res = await fetch(`${API_BASE_URL}/district/${encodeURIComponent(stateName)}?age=${age}`)
+  if (!res.ok) throw new Error(`Failed to fetch district insights for ${stateName}`)
+  return res.json()
 }
 
-// Anomaly endpoints
+// ================= ANOMALIES =================
+
 export async function getAnomalyAlerts(): Promise<Anomaly[]> {
-  const response = await fetch(`${API_BASE_URL}/anomaly/alerts`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-  if (!response.ok) throw new Error("Failed to fetch anomaly alerts")
-  return response.json()
+  const res = await fetch(`${API_BASE_URL}/anomaly/alerts`)
+  if (!res.ok) throw new Error("Failed to fetch anomaly alerts")
+  return res.json()
 }
 
-// Forecast endpoints
+// ================= FORECAST =================
+
 export async function getForecastComparison(): Promise<ForecastComparison> {
-  const response = await fetch(`${API_BASE_URL}/forecast/compare`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-  if (!response.ok) throw new Error("Failed to fetch forecast comparison")
-  return response.json()
+  const res = await fetch(`${API_BASE_URL}/forecast/compare`)
+  if (!res.ok) throw new Error("Failed to fetch forecast comparison")
+  return res.json()
 }
