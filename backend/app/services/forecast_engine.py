@@ -8,6 +8,10 @@ MODEL_DIR = "models"
 ARIMA_PATH = os.path.join(MODEL_DIR, "forecast_model.pkl")
 PROPHET_PATH = os.path.join(MODEL_DIR, "prophet_model.pkl")
 
+# Hardcoded accuracy from training (you can store dynamically later)
+ARIMA_MAPE = 48.05
+PROPHET_MAPE = 33.35
+
 
 def arima_forecast(steps=1):
     if not os.path.exists(ARIMA_PATH):
@@ -37,11 +41,24 @@ def prophet_forecast(steps=1):
     })
 
     forecast = model.predict(future)
-    return int(forecast.iloc[-1]["yhat"])
+    return int(forecast.iloc[-1]["yhat"]), int(forecast.iloc[-1]["yhat_lower"]), int(forecast.iloc[-1]["yhat_upper"])
 
 
 def combined_forecast():
+    arima = arima_forecast()
+    prophet, lower, upper = prophet_forecast()
+
+    risk = abs(arima - prophet) / max(arima, prophet)
+
+    recommended = "Prophet" if PROPHET_MAPE < ARIMA_MAPE else "ARIMA"
+
     return {
-        "arima_prediction": arima_forecast(),
-        "prophet_prediction": prophet_forecast()
+        "arima_prediction": arima,
+        "prophet_prediction": prophet,
+        "confidence_lower": lower,
+        "confidence_upper": upper,
+        "arima_mape": ARIMA_MAPE,
+        "prophet_mape": PROPHET_MAPE,
+        "recommended_model": recommended,
+        "risk_score": round(risk, 2)
     }
